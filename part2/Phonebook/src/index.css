@@ -111,21 +111,20 @@ code {
 }
 
 .notification {
-  padding: 10px 12px;
-  margin: 12px 0 16px;
+  padding: 10px;
+  margin: 12px 0 10px;
   border: 2px solid transparent;
-  border-radius: 6px;
-  font-size: 16px;
+  border-radius: 5px;
+  font-size: 20px;
+  background: #e5e5e5;
 }
 
 .notification.success {
-  color: #1f6f3d;
-  background: #e8f6ee;
-  border-color: #3bb273;
+  color: green;
+  border-color: green;
 }
 
 .notification.error {
-  color: #b42318;
-  background: #fdecec;
-  border-color: #f97066;
+  color: red;
+  border-color: red;
 }
