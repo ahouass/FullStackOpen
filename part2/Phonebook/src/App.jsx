@@ -84,6 +84,7 @@ const App = () => {
 
     personService.remove(id).then(() => {
       setPersons((currentPersons) => currentPersons.filter((person) => person.id !== id))
+      showNotification(`Deleted ${name}`)
     })
   }
 
