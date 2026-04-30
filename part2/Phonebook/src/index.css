@@ -109,3 +109,23 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+.notification {
+  padding: 10px 12px;
+  margin: 12px 0 16px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.notification.success {
+  color: #1f6f3d;
+  background: #e8f6ee;
+  border-color: #3bb273;
+}
+
+.notification.error {
+  color: #b42318;
+  background: #fdecec;
+  border-color: #f97066;
+}
