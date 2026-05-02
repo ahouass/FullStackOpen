@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import axios from 'axios';
+import Country from './components/Country';
 
 function App() {
   const [searchCountry, setSearchCountry] = useState('')
@@ -19,25 +20,7 @@ function App() {
     <div>
       <label>find countries </label>
       <input value={searchCountry} onChange={(e) => setSearchCountry(e.target.value)}></input>
-      <div>
-        {/* Too many results */}
-        {countriesToShow.length > 10 && (
-          <p>Too many matches, specify another filter</p>
-        )}
-
-        {countriesToShow.length <= 10 && countriesToShow.map(country =>
-          <p key={country.cca3}>{country.name.common}</p>
-        )}
-
-        {countriesToShow.length === 1 && countriesToShow.map(country =>
-          <>
-            <h1 key={country.cca3}>{country.name.common}</h1>
-            <p>capital {country.capital}</p>
-            <p>area {country.area}</p>
-            <h3>Languages</h3>
-          </>
-        )}
-      </div>
+      <Country countriesToShow={countriesToShow}/>
     </div>
   )
 }
