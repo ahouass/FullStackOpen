@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const Country = ({countriesToShow}) => {
 
-    const [filteredCountry, setFilteredCountry] = useState(null);
+  const [filteredCountry, setFilteredCountry] = useState(null);
   const [weather, setWeather] = useState(null);
   const [weatherError, setWeatherError] = useState(null);
 
