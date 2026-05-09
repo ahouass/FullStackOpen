@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import './App.css'
+// import './App.css'
 
 function App() {
   const [notes, setNotes] = useState([])
 
   useEffect(() => {
-    axios.get('http://localhost:3001/notes').then(response => {
+    axios.get('/api/notes').then(response => {
       setNotes(response.data)
     })
   }, [])
