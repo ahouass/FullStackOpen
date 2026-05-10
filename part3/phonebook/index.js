@@ -1,9 +1,11 @@
 const express = require('express');
 const morgan = require('morgan');
+const path = require('path')
 
 const app = express();
 
 app.use(express.json());
+app.use(express.static('dist'))
 
 const formatBody = (request) => {
   if (request.method !== 'POST') {
@@ -89,7 +91,11 @@ app.get('/info', (req, res) => {
   res.send(`<p>${title}</p><p>${new Date()}</p>`);
 });
 
-const PORT = 3001;
+app.get('/*splat', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'))
+})
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
