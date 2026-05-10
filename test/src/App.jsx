@@ -6,7 +6,7 @@ function App() {
   const [notes, setNotes] = useState([])
 
   useEffect(() => {
-    axios.get('/api/notes').then(response => {
+    axios.get('https://render-test-0o6c.onrender.com/api/notes').then(response => {
       setNotes(response.data)
     })
   }, [])
