@@ -29,7 +29,7 @@ app.use(morgan((tokens, request, response) => {
   ].filter(Boolean).join(' ');
 }));
 
-const persons =[
+let persons =[
     { 
       "id": "1",
       "name": "Arto Hellas", 
@@ -67,7 +67,7 @@ app.get('/api/persons/:id', (req, res) => {
 });
 
 app.post('/api/persons', (req, res) => {
-  if(re.body.name === undefined || req.body.number === undefined) {
+  if(req.body.name === undefined || req.body.number === undefined) {
     return res.status(400).json({ error: 'name or number is missing' });
   }
   if(persons.find(p => p.name === req.body.name)) {
