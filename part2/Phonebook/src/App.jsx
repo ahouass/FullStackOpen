@@ -35,46 +35,42 @@ const App = () => {
     }
 
     if (existingPerson) {
-      const wantsUpdate = window.confirm(
-        `${newName} is already added to phonebook, replace the old number with a new one?`
-      )
-
-      if (!wantsUpdate) {
+      if (!window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
         return
       }
 
-      const changedPerson = { ...existingPerson, number: newNumber }
-
+      const updatedPerson = { ...existingPerson, number: newNumber }
       personService
-        .update(existingPerson.id, changedPerson)
+        .update(existingPerson.id, updatedPerson)
         .then((returnedPerson) => {
           setPersons((currentPersons) =>
             currentPersons.map((person) =>
-              person.id === existingPerson.id ? returnedPerson : person
+              person.id === returnedPerson.id ? returnedPerson : person
             )
           )
           showNotification(`Updated ${returnedPerson.name}`)
           setNewName('')
           setNewNumber('')
         })
-        .catch(() => {
-          showNotification(
-            `Information of ${existingPerson.name} has already been removed from server`,
-            'error'
-          )
-          setPersons((currentPersons) =>
-            currentPersons.filter((person) => person.id !== existingPerson.id)
-          )
+        .catch((error) => {
+          const message = error.response?.data?.error || 'Failed to update person'
+          showNotification(message, 'error')
         })
       return
     }
 
-    personService.create(personObject).then((returnedPerson) => {
-      setPersons((currentPersons) => currentPersons.concat(returnedPerson))
-      showNotification(`Added ${returnedPerson.name}`)
-      setNewName('')
-      setNewNumber('')
-    })
+    personService
+      .create(personObject)
+      .then((returnedPerson) => {
+        setPersons((currentPersons) => currentPersons.concat(returnedPerson))
+        showNotification(`Added ${returnedPerson.name}`)
+        setNewName('')
+        setNewNumber('')
+      })
+      .catch((error) => {
+        const message = error.response?.data?.error || 'Failed to add person'
+        showNotification(message, 'error')
+      })
   }
 
   const deletePerson = (id, name) => {
@@ -82,10 +78,17 @@ const App = () => {
       return
     }
 
-    personService.remove(id).then(() => {
-      setPersons((currentPersons) => currentPersons.filter((person) => person.id !== id))
-      showNotification(`Deleted ${name}`)
-    })
+    personService
+      .remove(id)
+      .then(() => {
+        setPersons((currentPersons) => currentPersons.filter((person) => person.id !== id))
+        showNotification(`Deleted ${name}`)
+      })
+      .catch((error) => {
+        const message = error.response?.data?.error || `Information of ${name} has already been removed from server`
+        showNotification(message, 'error')
+        setPersons((currentPersons) => currentPersons.filter((person) => person.id !== id))
+      })
   }
 
   return (
