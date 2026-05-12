@@ -10,9 +10,30 @@ if (!mongoUrl) {
 mongoose.set('strictQuery', false)
 mongoose.connect(mongoUrl, { family: 4 })
 
+const phoneValidator = {
+  validator: (value) => {
+    if (typeof value !== 'string') {
+      return false
+    }
+    if (value.length < 8) {
+      return false
+    }
+    return /^\d{2,3}-\d+$/.test(value)
+  },
+  message: 'Number must be of form XX-XXXXXXX or XXX-XXXXXXXX'
+}
+
 const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+  name: {
+    type: String,
+    minlength: 3,
+    required: true,
+  },
+  number: {
+    type: String,
+    required: true,
+    validate: phoneValidator,
+  },
 }, { collection: 'persons' })
 
 module.exports = mongoose.model('Person', personSchema)
