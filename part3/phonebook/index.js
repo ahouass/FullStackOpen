@@ -3,7 +3,7 @@ require('dotenv').config()
 const express = require('express');
 const morgan = require('morgan');
 const path = require('path')
-const mongoose = require('mongoose')
+const Person = require('./models/person')
 
 const app = express();
 
@@ -32,22 +32,6 @@ app.use(morgan((tokens, request, response) => {
   ].filter(Boolean).join(' ');
 }));
 
-const mongoUrl = process.env.MONGODB_URI
-
-if (!mongoUrl) {
-  console.error('MONGODB_URI is missing')
-  process.exit(1)
-}
-
-mongoose.set('strictQuery', false)
-mongoose.connect(mongoUrl, { family: 4 })
-
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-}, { collection: 'persons' })
-
-const Person = mongoose.model('Person', personSchema)
 
 app.get('/api/persons', async (req, res, next) => {
   try {
@@ -89,6 +73,19 @@ app.post('/api/persons', async (req, res, next) => {
 
     const saved = await person.save()
     res.json(saved)
+  } catch (error) {
+    next(error)
+  }
+});
+
+app.put('/api/persons/:id', async (req, res, next) => {
+  try {
+    const updated = await Person.findByIdAndUpdate(
+      req.params.id,
+      { name: req.body.name, number: req.body.number },
+      { new: true }
+    )
+    res.json(updated)
   } catch (error) {
     next(error)
   }
