@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const path = require('path')
+const mongoose = require('mongoose')
 
 const app = express();
 
@@ -29,71 +30,99 @@ app.use(morgan((tokens, request, response) => {
   ].filter(Boolean).join(' ');
 }));
 
-let persons =[
-    { 
-      "id": "1",
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": "2",
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": "3",
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": "4",
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
+const mongoUrl = process.env.MONGODB_URI
+
+if (!mongoUrl) {
+  console.error('MONGODB_URI is missing')
+  process.exit(1)
+}
+
+mongoose.set('strictQuery', false)
+mongoose.connect(mongoUrl, { family: 4 })
+
+const personSchema = new mongoose.Schema({
+  name: String,
+  number: String,
+}, { collection: 'persons' })
+
+const Person = mongoose.model('Person', personSchema)
+
+app.get('/api/persons', async (req, res, next) => {
+  try {
+    const persons = await Person.find({})
+    res.json(persons)
+  } catch (error) {
+    next(error)
+  }
+});
+
+app.get('/api/persons/:id', async (req, res, next) => {
+  try {
+    const person = await Person.findById(req.params.id)
+    if (person) {
+      res.json(person)
+    } else {
+      res.status(404).end()
     }
-];
-
-app.get('/api/persons', (req, res) => {
-  res.json(persons);
-});
-
-app.get('/api/persons/:id', (req, res) => {
-  const id = req.params.id;
-  const person = persons.find(p => p.id === id);
-  if (person) {
-    res.json(person);
-  } else {
-    res.status(404).end();
+  } catch (error) {
+    next(error)
   }
 });
 
-app.post('/api/persons', (req, res) => {
-  if(req.body.name === undefined || req.body.number === undefined) {
-    return res.status(400).json({ error: 'name or number is missing' });
+app.post('/api/persons', async (req, res, next) => {
+  try {
+    if (req.body.name === undefined || req.body.number === undefined) {
+      return res.status(400).json({ error: 'name or number is missing' })
+    }
+
+    const existing = await Person.findOne({ name: req.body.name })
+    if (existing) {
+      return res.status(400).json({ error: 'name must be unique' })
+    }
+
+    const person = new Person({
+      name: req.body.name,
+      number: req.body.number,
+    })
+
+    const saved = await person.save()
+    res.json(saved)
+  } catch (error) {
+    next(error)
   }
-  if(persons.find(p => p.name === req.body.name)) {
-    return res.status(400).json({ error: 'name must be unique' });
-  }
-  const { name, number } = req.body;
-  const id = Math.floor(Math.random() * 1000000).toString();
-  const newPerson = { id, name, number };
-  persons.push(newPerson);
-  res.json(newPerson);
 });
 
-app.delete('/api/persons/:id', (req, res) => {
-  const id = req.params.id;
-  persons = persons.filter(p => p.id !== id);
-  res.status(204).end();
+app.delete('/api/persons/:id', async (req, res, next) => {
+  try {
+    await Person.findByIdAndDelete(req.params.id)
+    res.status(204).end()
+  } catch (error) {
+    next(error)
+  }
 });
 
-app.get('/info', (req, res) => {
-  const title = `Phonebook has info for ${persons.length} people`;
-  res.send(`<p>${title}</p><p>${new Date()}</p>`);
+app.get('/info', async (req, res, next) => {
+  try {
+    const count = await Person.countDocuments({})
+    const title = `Phonebook has info for ${count} people`
+    res.send(`<p>${title}</p><p>${new Date()}</p>`)
+  } catch (error) {
+    next(error)
+  }
 });
 
 app.get('/*splat', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })
+
+const errorHandler = (error, req, res, next) => {
+  if (error.name === 'CastError') {
+    return res.status(400).json({ error: 'malformatted id' })
+  }
+  next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
