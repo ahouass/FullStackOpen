@@ -9,13 +9,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "node --watch index.js",
-    "lint": "eslint .",
-    "build:ui": "rm -rf dist && cd ../../part2/Bloglist && npm run build && cp -r dist ../../part4/bloglist",
-    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push"
+    "dev": "node --watch index.js"
   },
   "dependencies": {
-    "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "mongoose": "^9.6.2"
   }
