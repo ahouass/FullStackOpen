@@ -1,5 +1,3 @@
-const lodash = require('lodash')
-
 const dummy = (blogs) => {
   return 1
 }
@@ -9,30 +7,66 @@ const totalLikes = (blogs) => {
 }
 
 const favoriteBlog = (blogs) => {
-  let max = 0;
-  let favorite = null;
-  blogs.forEach(blog => {
-    if (blog.likes > max) {
-      max = blog.likes;
-      favorite = blog;
-    }
-  });
-  return favorite;
+  if (blogs.length === 0) {
+    return null
+  }
+
+  return blogs.reduce((favorite, blog) => {
+    return blog.likes > favorite.likes ? blog : favorite
+  }, blogs[0])
 }
 
-const mostBlogs  = (blogs) => {
-  const maxBlogs = lodash.maxBy(lodash.values(lodash.groupBy(blogs, 'author')), (o) => o.length)
+const mostBlogs = (blogs) => {
+  if (blogs.length === 0) {
+    return null
+  }
+
+  const counts = {}
+
+  for (const blog of blogs) {
+    counts[blog.author] = (counts[blog.author] || 0) + 1
+  }
+
+  let topAuthor = null
+  let topCount = 0
+
+  for (const author of Object.keys(counts)) {
+    if (counts[author] > topCount) {
+      topCount = counts[author]
+      topAuthor = author
+    }
+  }
+
   return {
-    author: maxBlogs[0].author,
-    blogs: maxBlogs.length
+    author: topAuthor,
+    blogs: topCount,
   }
 }
 
 const mostLikes = (blogs) => {
-  const maxLikes = lodash.maxBy(lodash.values(lodash.groupBy(blogs, 'author')), (o) => lodash.sumBy(o, 'likes'))
+  if (blogs.length === 0) {
+    return null
+  }
+
+  const totals = {}
+
+  for (const blog of blogs) {
+    totals[blog.author] = (totals[blog.author] || 0) + blog.likes
+  }
+
+  let topAuthor = null
+  let topLikes = Number.NEGATIVE_INFINITY
+
+  for (const author of Object.keys(totals)) {
+    if (totals[author] > topLikes) {
+      topLikes = totals[author]
+      topAuthor = author
+    }
+  }
+
   return {
-    author: maxLikes[0].author,
-    likes: lodash.sumBy(maxLikes, 'likes')
+    author: topAuthor,
+    likes: topLikes,
   }
 }
 
